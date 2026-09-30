@@ -1,69 +1,210 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState } from 'react';
+import { 
+  Header, 
+  Sidebar 
+} from '@/components/layout';
+import { 
+  CreateContentForm, 
+  PipelinePreviewBar 
+} from '@/components/content';
+import { 
+  GenerationWorkspace 
+} from '@/components/generation';
+import { 
+  ReviewWorkspace 
+} from '@/components/review';
+import { 
+  VideoResultPlaceholder 
+} from '@/components/video';
+import { 
+  GenerationRequest, 
+  GenerationStatus, 
+  GenerationResult,
+  PublishResult 
+} from '@/lib/api/types';
+import { Sparkles, Radio } from 'lucide-react';
+
+interface ActiveJobState {
+  jobId: string;
+  request: GenerationRequest;
+  status: GenerationStatus;
+}
+
+export default function ContentStudioPage() {
+  const [currentTab, setCurrentTab] = useState<'studio' | 'generation' | 'review' | 'result' | 'feed'>('studio');
+  const [activeJob, setActiveJob] = useState<ActiveJobState | null>(null);
+  const [activeResult, setActiveResult] = useState<GenerationResult | null>(null);
+  const [hasCreatedVideo, setHasCreatedVideo] = useState(false);
+  const [publicationResult, setPublicationResult] = useState<PublishResult | null>(null);
+
+  const handleGenerationStarted = (
+    jobId: string, 
+    request: GenerationRequest, 
+    status: GenerationStatus
+  ) => {
+    setActiveJob({ jobId, request, status });
+    setActiveResult(null);
+    setHasCreatedVideo(false);
+    setPublicationResult(null);
+    setCurrentTab('generation');
+  };
+
+  const handleReviewContent = (result: GenerationResult) => {
+    setActiveResult(result);
+    setCurrentTab('review');
+  };
+
+  const handleCreateVideo = (updatedResult?: GenerationResult) => {
+    if (updatedResult) {
+      setActiveResult(updatedResult);
+    }
+    setHasCreatedVideo(true);
+    setCurrentTab('result');
+  };
+
+  const handleBackToStudio = () => {
+    setCurrentTab('studio');
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-[#090a0f] text-slate-100 flex flex-col bg-grid-subtle">
+      {/* Top Header */}
+      <Header onReset={handleBackToStudio} />
+
+      {/* Main Workspace with Sidebar Rail */}
+      <div className="flex flex-1">
+        {/* Navigation Rail */}
+        <Sidebar 
+          currentTab={currentTab} 
+          onSelectTab={setCurrentTab}
+          hasActiveJob={!!activeJob}
+          hasResult={!!activeResult}
+          hasComposedVideo={hasCreatedVideo || currentTab === 'result'}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+
+        {/* Content Viewport */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto w-full">
+          {currentTab === 'studio' && (
+            <div className="space-y-8 animate-fadeIn">
+              {/* Studio Title & Positioning */}
+              <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-xs font-semibold text-indigo-400">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>AI Content Director</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                  Create something worth watching.
+                </h1>
+                <p className="text-sm sm:text-base text-slate-400 max-w-2xl leading-relaxed">
+                  Turn a topic, idea, or trend into a ready-to-publish video for the Qoneqt Global Feed.
+                </p>
+              </div>
+
+              {/* Visual Pipeline Progression Ribbon */}
+              <PipelinePreviewBar />
+
+              {/* Core Content Form */}
+              <CreateContentForm onGenerationStarted={handleGenerationStarted} />
+            </div>
+          )}
+
+          {currentTab === 'generation' && activeJob && (
+            <GenerationWorkspace
+              jobId={activeJob.jobId}
+              request={activeJob.request}
+              initialStatus={activeJob.status}
+              onReviewContent={handleReviewContent}
+              onBackToStudio={handleBackToStudio}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          )}
+
+          {currentTab === 'review' && activeResult && (
+            <ReviewWorkspace
+              result={activeResult}
+              onCreateVideo={handleCreateVideo}
+              onBackToStudio={handleBackToStudio}
+            />
+          )}
+
+          {currentTab === 'result' && activeResult && (
+            <VideoResultPlaceholder
+              result={activeResult}
+              onBackToReview={() => setCurrentTab('review')}
+              onBackToStudio={handleBackToStudio}
+              onNavigateToFeed={() => setCurrentTab('feed')}
+              onUpdateResult={(updated) => setActiveResult(updated)}
+              publicationResult={publicationResult}
+              onPublishSuccess={(res) => setPublicationResult(res)}
+            />
+          )}
+
+          {/* State Fallback Card when a pipeline tab is selected without an active job/result */}
+          {((currentTab === 'generation' && !activeJob) ||
+            (currentTab === 'review' && !activeResult) ||
+            (currentTab === 'result' && !activeResult)) && (
+            <div className="rounded-2xl border border-[#1e2230] bg-[#0d1017] p-10 text-center space-y-4 max-w-lg mx-auto animate-fadeIn mt-12">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <Sparkles className="h-7 w-7 text-indigo-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white">No Active Production Job</h2>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                You are viewing a pipeline stage that requires an active video production job. Start by entering a topic in the Content Studio.
+              </p>
+              <button
+                type="button"
+                onClick={handleBackToStudio}
+                className="mt-2 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-indigo-500 transition cursor-pointer"
+              >
+                Return to Content Studio
+              </button>
+            </div>
+          )}
+
+          {currentTab === 'feed' && (
+            <div className="rounded-2xl border border-[#1e2230] bg-[#0d1017] p-8 text-center space-y-5 max-w-xl mx-auto animate-fadeIn">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <Radio className="h-7 w-7 text-indigo-400 animate-pulse" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Qoneqt Global Feed Integration</h2>
+                <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto mt-1 leading-relaxed">
+                  Direct distribution channel to the Qoneqt short-form video discovery network.
+                </p>
+              </div>
+
+              {publicationResult ? (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 text-xs text-left space-y-2 font-mono">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="font-sans">Latest Broadcast:</span>
+                    <span className="text-emerald-400 font-bold uppercase">{publicationResult.platformStatus}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="font-sans">Publication ID:</span>
+                    <span className="text-indigo-400">{publicationResult.publicationId}</span>
+                  </div>
+                  <div className="text-[11px] font-sans text-slate-400 pt-1 border-t border-[#1a2030]">
+                    Algorithmic distribution active across all short-form viewer channels.
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">
+                  No video broadcast yet. Create and publish a video in Content Studio to see it listed here.
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={handleBackToStudio}
+                className="mt-2 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white hover:bg-indigo-500 transition cursor-pointer"
+              >
+                Return to Content Studio
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
