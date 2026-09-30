@@ -51,9 +51,9 @@ export function VideoResultWorkspace({
 
   // Quality readiness check
   const isQualityReady = 
-    result.qualityStatus.passed && 
-    result.qualityStatus.readyForPublishing && 
-    result.qualityStatus.checks.every(c => c.passed);
+    Boolean(result?.qualityStatus?.passed) && 
+    Boolean(result?.qualityStatus?.readyForPublishing) && 
+    (result?.qualityStatus?.checks || []).every(c => c.passed);
 
   // Handle scene-level regeneration update
   const handleSceneUpdated = (updatedScene: Scene) => {

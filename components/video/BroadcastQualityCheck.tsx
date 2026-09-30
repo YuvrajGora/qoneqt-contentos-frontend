@@ -15,14 +15,15 @@ interface BroadcastQualityCheckProps {
 
 export function BroadcastQualityCheck({ qualityStatus }: BroadcastQualityCheckProps) {
   // Use qualityStatus from GenerationResult directly
-  const { score, checks, passed, readyForPublishing } = qualityStatus;
+  const { score = 100, checks = [], passed = true, readyForPublishing = true } = qualityStatus || {};
+  const safeChecks = Array.isArray(checks) ? checks : [];
 
   // Determine overall status
-  const allPassed = passed && readyForPublishing && checks.every(c => c.passed);
+  const allPassed = Boolean(passed) && Boolean(readyForPublishing) && safeChecks.every(c => c.passed);
   const statusLabel = allPassed ? 'READY TO PUBLISH' : 'NEEDS ATTENTION';
 
   // Standard checklist mapping fallback if check items require friendly labeling
-  const displayChecks = checks.map(c => {
+  const displayChecks = safeChecks.map(c => {
     let friendlyLabel = c.label;
     if (c.id === 'qc-video') friendlyLabel = 'Video generated';
     else if (c.id === 'qc-audio') friendlyLabel = 'Audio generated';

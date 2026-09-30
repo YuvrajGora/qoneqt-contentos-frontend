@@ -21,7 +21,7 @@ export function StoryOverviewCard({ title, hook, scenes }: StoryOverviewCardProp
   const [isCopied, setIsCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const fullScript = scenes.map((s) => s.narration).join('\n\n');
+  const fullScript = (scenes || []).map((s) => s.narration).join('\n\n');
 
   const handleCopyScript = () => {
     navigator.clipboard.writeText(fullScript);

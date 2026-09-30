@@ -60,7 +60,7 @@ export function CompactSceneList({
             Scenes
           </h3>
           <span className="rounded-full bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 text-xs font-semibold text-indigo-300">
-            {scenes.length} Segments
+            {(scenes || []).length} Segments
           </span>
         </div>
         <span className="text-xs text-slate-400">
@@ -70,7 +70,7 @@ export function CompactSceneList({
 
       {/* Compact Scene List */}
       <div className="space-y-2.5">
-        {scenes.map((scene) => {
+        {(scenes || []).map((scene) => {
           const isRegen = regeneratingSceneId === scene.id;
           const isSuccess = successSceneId === scene.id;
           const isErr = errorSceneId === scene.id;

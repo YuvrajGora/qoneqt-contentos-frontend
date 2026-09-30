@@ -74,8 +74,12 @@ export function GenerationWorkspace({
     );
   };
 
-  const isComplete = status.status === 'completed' && !!result;
-  const activeStage = status.stages.find((s) => s.status === 'active') || null;
+  const isComplete = status?.status === 'completed' && !!result;
+  const safeStages = Array.isArray(status?.stages) ? status.stages : [];
+  const activeStage = safeStages.find((s) => s.status === 'active') || safeStages[0] || null;
+  const completedCount = Array.isArray(status?.completedStages) ? status.completedStages.length : 0;
+  const totalStagesCount = safeStages.length || 8;
+  const safeActivityLogs = Array.isArray(status?.activityLogs) ? status.activityLogs : [];
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -113,7 +117,7 @@ export function GenerationWorkspace({
             ) : (
               <span className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-3.5 py-1.5 text-xs font-semibold text-indigo-300">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-400" />
-                <span>Generating ({status.progress}%)</span>
+                <span>Generating ({status?.progress ?? 0}%)</span>
               </span>
             )}
 
@@ -167,12 +171,12 @@ export function GenerationWorkspace({
                   ContentOS Pipeline Stages
                 </span>
                 <span className="text-xs text-slate-500 font-mono">
-                  {status.completedStages.length} / {status.stages.length} Completed
+                  {completedCount} / {totalStagesCount} Completed
                 </span>
               </div>
 
               <div className="space-y-2">
-                {status.stages.map((stage) => (
+                {safeStages.map((stage) => (
                   <PipelineStageItem
                     key={stage.id}
                     stage={stage}
@@ -198,7 +202,7 @@ export function GenerationWorkspace({
             />
 
             {/* Live Activity Log */}
-            <PipelineActivityLog logs={status.activityLogs || []} />
+            <PipelineActivityLog logs={safeActivityLogs} />
           </div>
         </div>
       )}

@@ -41,14 +41,14 @@ export function StoryboardList({
         <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
           <span className="inline-flex items-center gap-1.5 rounded-lg border border-[#1e2334] bg-[#0c0e15] px-3 py-1">
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-            <span>{scenes.length} Story Beats Planned</span>
+            <span>{(scenes || []).length} Story Beats Planned</span>
           </span>
         </div>
       </div>
 
       {/* Scene Cards Stack */}
       <div className="space-y-4">
-        {scenes.map((scene) => (
+        {(scenes || []).map((scene) => (
           <SceneCard
             key={scene.id}
             scene={scene}

@@ -63,10 +63,10 @@ export function VideoPlayer({
 
   // Identify active scene based on currentTime
   const activeSceneInfo = useMemo(() => {
-    if (sceneIntervals.length === 0) return null;
-    const found = sceneIntervals.find(
-      (item) => currentTime >= item.start && currentTime < item.end
-    );
+    if (!sceneIntervals || sceneIntervals.length === 0) return null;
+    const found = sceneIntervals.find
+      ? sceneIntervals.find((item) => currentTime >= item.start && currentTime < item.end)
+      : null;
     return found || sceneIntervals[sceneIntervals.length - 1];
   }, [sceneIntervals, currentTime]);
 

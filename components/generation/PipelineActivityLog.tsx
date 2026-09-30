@@ -37,7 +37,7 @@ export function PipelineActivityLog({ logs }: PipelineActivityLogProps) {
         ref={containerRef}
         className="space-y-2.5 overflow-y-auto max-h-56 sm:max-h-64 pr-1 font-mono text-xs scroll-smooth"
       >
-        {logs.map((log) => {
+        {(logs || []).map((log) => {
           const isDone = log.status === 'completed';
           const isActive = log.status === 'active';
           return (

@@ -69,7 +69,7 @@ export function InputSummaryCard({
             Pipeline Stages
           </span>
           <span className="text-sm font-bold text-white mt-0.5 block">
-            {status.stages.length} Stages
+            {status?.stages?.length ?? 8} Stages
           </span>
         </div>
 
@@ -78,9 +78,9 @@ export function InputSummaryCard({
             Job Status
           </span>
           <span className={`text-sm font-bold mt-0.5 block capitalize ${
-            status.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'
+            status?.status === 'completed' ? 'text-emerald-400' : 'text-indigo-400'
           }`}>
-            {status.status === 'completed' ? 'Complete' : 'Processing'}
+            {status?.status === 'completed' ? 'Complete' : 'Processing'}
           </span>
         </div>
       </div>
